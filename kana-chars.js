@@ -5,6 +5,7 @@ const threshold = 10000;
 const idiomLength = 3;
 
 const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
+const ignoreList = fs.readFileSync('ignore-kana.lst', 'utf-8').split('\n');
 (async() => {
   var idioms = {};
   const stream = fs.createReadStream('nwc2010-ngrams/char/over999/5gms/5gm.lst');
@@ -34,6 +35,9 @@ const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
   }
   for (var i=0; i<sexualList.length; i++) {
     delete idioms[sexualList[i]];
+  }
+  for (var i=0; i<ignoreList.length; i++) {
+    delete idioms[ignoreList[i]];
   }
   for (var idiom of Object.keys(idioms)) {
     if (idioms[idiom] < threshold) {

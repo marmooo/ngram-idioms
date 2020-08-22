@@ -6,6 +6,7 @@ const mergeNum = 1;  // 形態素の結合数 (2以上はノイズあり)
 const idiomLength = 3;
 
 const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
+const ignoreList = fs.readFileSync('ignore-kana.lst', 'utf-8').split('\n');
 (async() => {
   var idioms = {};
   const stream = fs.createReadStream('nwc2010-ngrams/word/over999/5gms/5gm.lst');
@@ -14,17 +15,17 @@ const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
     var included = true;
     var morphemes = line.split(/\s/);
     var count = parseInt(morphemes[morphemes.length-1]);
-    if (!/[0-9ァ-ヶ]/.test(morphemes[0])) {
+    if (!/[0-9ァ-ヶー]/.test(morphemes[0])) {
       for (var m=2; m<mergeNum+2; m++) {
         var idiom = morphemes.slice(1, m).join('');
         if (idiom.length == idiomLength) {
           var chars = idiom.split('');
           for (var i=0; i<chars.length; i++) {
-            if (!/[ァ-ヶ]/.test(chars[i])) {
+            if (!/[ァ-ヶー]/.test(chars[i])) {
               included = false;
             }
           }
-          if (included && /[0-9ァ-ヶ]/.test(morphemes[m])) {
+          if (included && /[0-9ァ-ヶー]/.test(morphemes[m])) {
             included = false;
           }
           if (included) {
@@ -40,6 +41,9 @@ const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
   }
   for (var i=0; i<sexualList.length; i++) {
     delete idioms[sexualList[i]];
+  }
+  for (var i=0; i<ignoreList.length; i++) {
+    delete idioms[ignoreList[i]];
   }
   for (var idiom of Object.keys(idioms)) {
     if (idioms[idiom] < threshold) {
