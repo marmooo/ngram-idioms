@@ -2,12 +2,10 @@
 N-gram からニ文字熟語や三文字熟語を機械的に生成します。
 
 # Installation
-```
-# install [N-gram corpus](http://www.s-yata.jp/corpus/nwc2010/ngrams/))
-npm install
-```
+1. install [N-gram corpus](http://www.s-yata.jp/corpus/nwc2010/ngrams/)
+2. ```npm install```
 
-# Usage
+## Usage
 ```
 node build.js
 ```
