@@ -28,14 +28,52 @@ const s6 = s5.concat(s6a);
 const j12 = s6.concat(j12a);
 const j3 = j12.concat(j3a);
 const kanjiSets = [s1, s1, s2, s3, s4, s5, s6, j12, j3];
-const threshold = 10000;
-const filtering = true;
-const mergeNum = 1;  // 形態素の結合数 (2以上はノイズあり)
+const threshold = 0;
+const filtering = false;
+const mergeNum = 2;  // 形態素の結合数 (2以上はノイズあり)
 const idiomLength = 2;
 
 const nameList = fs.readFileSync('family-name.lst', 'utf-8').split('\n');
 const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
 const ignoreList = fs.readFileSync('ignore' + idiomLength + '.lst', 'utf-8').split('\n');
+
+function filter(idiom) {
+  if (idiom.length == 2) {
+    if (idiom[0] == idiom[1]) {
+      return true;
+    }
+    if (/[一二三四五六七八九十百千万]/.test(idiom[0])) {  // 一目, 三文
+      return true;
+    }
+  } else if (idiom.length == 3) {
+    if (idiom[0] == idiom[1] && idiom[1] == idiom[2]) {
+      return true;
+    }
+    if (/[前後中別率性度時可系用編市区町村郡港橋山岳川谷島寺]/.test(idiom[idiom.length-1])) {
+      // どんな語句にも繋がる語尾、固有名詞になる語尾は削除  / TODO: 派駅川
+      // 川→神奈川が消えることに注意
+      return true;
+    }
+    if (/[左右東西南北内外者名様等共何的氏来他日歳毎板]/.test(idiom[idiom.length-1])) {
+      // 問題としてつまらない (意味に変化がない) 語尾は削除  // TODO: 化上下
+      return true;
+    }
+    if (/[各御元第別他]/.test(idiom[0])) {
+      // 問題としてつまらない接頭辞は削除  // TODO: 当
+      return true;
+    }
+    if (/^[一二三四五六七八九十百千万]{3}/.test(idiom)) {
+      return true;
+    }
+    if (/[一二三四五六七八九十百千万何数][話章部節曲人点番回度年月日号円点曲色発歩枚条位級列社丁]/.test(idiom)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
 (async() => {
   var level = parseInt(args[0]);
   var kanjiSet = kanjiSets[level];
@@ -65,58 +103,37 @@ const ignoreList = fs.readFileSync('ignore' + idiomLength + '.lst', 'utf-8').spl
           if (included && /[0-9\u4E00-\u9FFF]/.test(morphemes[m])) {
             included = false;
           }
-          if (included && filtering) {
-            if (idiom.length == 2) {
-              if (/[一二三四五六七八九十百千万]/.test(idiom[0])) {  // 一目, 三文
-                included = false;
-              }
-            } else if (idiom.length == 3) {
-              if (/[前後中別率性度時可系用編市区町村郡港橋山岳川谷島寺]/.test(idiom[idiom.length-1])) {
-                // どんな語句にも繋がる語尾、固有名詞になる語尾は削除  / TODO: 派駅川
-                // 川→神奈川が消えることに注意
-                included = false;
-              }
-              if (/[左右東西南北内外者名様等共何的氏来他日歳毎板]/.test(idiom[idiom.length-1])) {
-                // 問題としてつまらない (意味に変化がない) 語尾は削除  // TODO: 化上下
-                included = false;
-              }
-              if (/[各御元第別他]/.test(idiom[0])) {
-                // 問題としてつまらない接頭辞は削除  // TODO: 当
-                included = false;
-              }
-              if (/^[一二三四五六七八九十百千万]{3}/.test(idiom)) {
-                included = false;
-              }
-              if (/[一二三四五六七八九十百千万何数][話章部節曲人点番回度年月日号円点曲色発歩枚条位級列社丁]/.test(idiom)) {
-                included = false;
-              }
-            }
-          }
           if (included) {
-            if (idioms[idiom]) {
-              idioms[idiom] += count;
-            } else {
-              idioms[idiom] = count;
+            var filtered = false;
+            if (filtering) {
+              filtered = filter(idiom);
+            }
+            if (!filtered) {
+              if (idioms[idiom]) {
+                idioms[idiom] += count;
+              } else {
+                idioms[idiom] = count;
+              }
             }
           }
         }
       }
     }
   }
-  for (var i=0; i<nameList.length; i++) {
-    delete idioms[nameList[i]];
-  }
-  for (var i=0; i<sexualList.length; i++) {
-    delete idioms[sexualList[i]];
-  }
-  for (var i=0; i<ignoreList.length; i++) {
-    delete idioms[ignoreList[i]];
-  }
-  for (var idiom of Object.keys(idioms)) {
-    if (idioms[idiom] < threshold) {
-      delete idioms[idiom];
-    }
-  }
+  // for (var i=0; i<nameList.length; i++) {
+  //   delete idioms[nameList[i]];
+  // }
+  // for (var i=0; i<sexualList.length; i++) {
+  //   delete idioms[sexualList[i]];
+  // }
+  // for (var i=0; i<ignoreList.length; i++) {
+  //   delete idioms[ignoreList[i]];
+  // }
+  // for (var idiom of Object.keys(idioms)) {
+  //   if (idioms[idiom] < threshold) {
+  //     delete idioms[idiom];
+  //   }
+  // }
   var arr = Object.keys(idioms).map((e)=>({ key: e, value: idioms[e] }));
   arr.sort(function(a,b){
     if(a.value < b.value) return 1;

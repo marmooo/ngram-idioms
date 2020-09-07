@@ -35,6 +35,43 @@ const idiomLength = 2;
 const nameList = fs.readFileSync('family-name.lst', 'utf-8').split('\n');
 const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
 const ignoreList = fs.readFileSync('ignore' + idiomLength + '.lst', 'utf-8').split('\n');
+
+function filter(idiom) {
+  if (idiom.length == 2) {
+    if (idiom[0] == idiom[1]) {
+      return true;
+    }
+    if (/[一二三四五六七八九十百千万]/.test(idiom[0])) {  // 一目, 三文
+      return true;
+    }
+  } else if (idiom.length == 3) {
+    if (idiom[0] == idiom[1] && idiom[1] == idiom[2]) {
+      return true;
+    }
+    if (/[前後中別率性度時可系用編市区町村郡港橋山岳川谷島寺]/.test(idiom[idiom.length-1])) {
+      // どんな語句にも繋がる語尾、固有名詞になる語尾は削除  / TODO: 派駅川
+      // 川→神奈川が消えることに注意
+      return true;
+    }
+    if (/[左右東西南北内外者名様等共何的氏来他日歳毎板]/.test(idiom[idiom.length-1])) {
+      // 問題としてつまらない (意味に変化がない) 語尾は削除  // TODO: 化上下
+      return true;
+    }
+    if (/[各御元第別他]/.test(idiom[0])) {
+      // 問題としてつまらない接頭辞は削除  // TODO: 当
+      return true;
+    }
+    if (/^[一二三四五六七八九十百千万]{3}/.test(idiom)) {
+      return true;
+    }
+    if (/[一二三四五六七八九十百千万何数][話章部節曲人点番回度年月日号円点曲色発歩枚条位級列社丁]/.test(idiom)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 (async() => {
   var level = parseInt(args[0]);
   var kanjiSet = kanjiSets[level];
@@ -60,33 +97,18 @@ const ignoreList = fs.readFileSync('ignore' + idiomLength + '.lst', 'utf-8').spl
       if (included && /[0-9\u4E00-\u9FFF]/.test(arr[idiomLength+1])) {
         included = false;
       }
-      if (included && filtering) {
-        var idiom = arr.slice(1, idiomLength + 1).join('');
-        if (idiom.length == 2) {
-          if (/[一二三四五六七八九十百千万]/.test(idiom[0])) {  // 一目, 三文
-            included = false;
-          }
-        } else if (idiom.length == 3) {
-          if (/[前後中別率性度時可系用編市区町村郡港橋山岳谷島寺]/.test(idiom[idiom.length-1])) {
-            // どんな語句にも繋がる語尾、固有名詞になる語尾は削除  // TODO: 派駅川
-            included = false;
-          } else if (/[左右東西南北内外者名様等共何的氏来他日歳毎]/.test(idiom[idiom.length-1])) {
-            // 問題としてつまらない (意味に変化がない) 語尾は削除  // TODO: 化上下
-            included = false;
-          } else if (/[各御元第別他]/.test(idiom[0])) {
-            // 問題としてつまらない接頭辞は削除  // TODO: 当
-            included = false;
-          } else if (/[一二三四五六七八九十百千万]{3}/.test(idiom)) {
-            included = false;
-          } else if (/[一二三四五六七八九十百千万何数][話章部節曲人点番回度年月日号円点曲色発歩枚条位級列社丁]/.test(idiom)) {
-            included = false;
-          }
+      if (included) {
+        var filtered = false;
+        if (filtering) {
+          filtered = filter(idiom);
         }
-        var count = parseInt(arr[arr.length-1]);
-        if (idioms[idiom]) {
-          idioms[idiom] += count;
-        } else {
-          idioms[idiom] = count;
+        if (!filtered) {
+          var count = parseInt(arr[arr.length-1]);
+          if (idioms[idiom]) {
+            idioms[idiom] += count;
+          } else {
+            idioms[idiom] = count;
+          }
         }
       }
     }
