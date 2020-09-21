@@ -3,7 +3,7 @@ const readline = require('readline');
 
 const threshold = 10000;
 const mergeNum = 1;  // 形態素の結合数 (2以上はノイズあり)
-const idiomLength = 3;
+const idiomLength = 6;
 
 const sexualList = fs.readFileSync('Sexual.txt', 'utf-8').split('\n');
 const ignoreList = fs.readFileSync('ignore-kana.lst', 'utf-8').split('\n');
@@ -18,15 +18,12 @@ const ignoreList = fs.readFileSync('ignore-kana.lst', 'utf-8').split('\n');
     if (!/[0-9ァ-ヶー]/.test(morphemes[0])) {
       for (var m=2; m<mergeNum+2; m++) {
         var idiom = morphemes.slice(1, m).join('');
-        if (idiom.length == idiomLength) {
+        if (idiom.length == idiomLength && !/[0-9ァ-ヶー]/.test(morphemes[m])) {
           var chars = idiom.split('');
           for (var i=0; i<chars.length; i++) {
             if (!/[ァ-ヶー]/.test(chars[i])) {
               included = false;
             }
-          }
-          if (included && /[0-9ァ-ヶー]/.test(morphemes[m])) {
-            included = false;
           }
           if (included) {
             if (idioms[idiom]) {
