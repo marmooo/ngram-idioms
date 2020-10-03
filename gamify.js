@@ -17,20 +17,20 @@ function getIgnored(filepath, idioms) {
 var stream = fs.createWriteStream('dist/game2.js');
 for (var i=1; i<=9; i++) {
   var idioms = fs.readFileSync('kanji-2-10000/' + i + '.arr');
-  stream.write(`let i${i} = Array.from('${idioms.slice(0, -1)}');\n`);
+  stream.write(`const i${i}_ = '${idioms.slice(0, -1)}'.split(',');\n`);
 }
 for (var i=1; i<=9; i++) {
   var idioms = fs.readFileSync('kanji-2-10000/' + i + '.arr');
   idioms = idioms.toString().split(',').slice(0, -1);
   var ignored = getIgnored('kanji-2-all/' + i + '.arr', idioms);
-  stream.write(`let g${i} = Array.from('${ignored}');\n`);
+  stream.write(`const g${i}_ = '${ignored}'.split(',');\n`);
 }
 stream.end();
 
 stream = fs.createWriteStream('dist/game3.js');
 for (var i=1; i<=9; i++) {
   var idioms = fs.readFileSync('kanji-3-5000/' + i + '.arr');
-  stream.write(`let i${i} = Array.from('${idioms.slice(0, -1)}');\n`);
+  stream.write(`const i${i}_ = '${idioms.slice(0, -1)}'.split(',');\n`);
 }
 stream.end();
 
@@ -39,13 +39,13 @@ for (var i=1; i<=9; i++) {
   var idioms2 = fs.readFileSync('kanji-2-10000/' + i + '.arr');
   var idioms3 = fs.readFileSync('kanji-3-5000/' + i + '.arr');
   var idioms = idioms2 + idioms3;
-  stream.write(`let i${i} = Array.from('${idioms.slice(0, -1)}');\n`);
+  stream.write(`const i${i}_ = '${idioms.slice(0, -1)}'.split(',');\n`);
 }
 for (var i=1; i<=9; i++) {
   var idioms = fs.readFileSync('kanji-2-10000/' + i + '.arr')
   idioms = idioms.toString().split(',').slice(0, -1);
   var ignored = getIgnored('kanji-2-all/' + i + '.arr', idioms);
-  stream.write(`let g${i} = Array.from('${ignored}');\n`);
+  stream.write(`const g${i}_ = '${ignored}'.split(',');\n`);
 }
 stream.end();
 
