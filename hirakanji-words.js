@@ -121,7 +121,7 @@ function isValidWord(word, level) {
 async function listupFromWords(mecab, level) {
   const idioms = {};
   const fileReader = await Deno.open(
-    "nwc2010-ngrams/word/over999/1gms/1gm.lst",
+    "nwc2010-ngrams/word/over999/1gms/1gm-0000",
   );
   for await (const line of readLines(fileReader)) {
     const arr = line.split(/\s/);

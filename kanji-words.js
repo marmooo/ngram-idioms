@@ -136,7 +136,7 @@ function filter(idiom) {
 async function _listupFromChars(level) {
   const idioms = {};
   const fileReader = await Deno.open(
-    "nwc2010-ngrams/char/over999/5gms/5gm.lst",
+    "nwc2010-ngrams/char/over999/5gms/5gm-0000",
   );
   for await (const line of readLines(fileReader)) {
     const arr = line.split(/\s/); // <S>, </S> に注意が必要
@@ -167,7 +167,7 @@ async function _listupFromChars(level) {
 async function listupFromWords(level) {
   const idioms = {};
   const fileReader = await Deno.open(
-    "nwc2010-ngrams/word/over999/5gms/5gm.lst",
+    "nwc2010-ngrams/word/over999/5gms/5gm-0000",
   );
   for await (const line of readLines(fileReader)) {
     const morphemes = line.split(/\s/);
